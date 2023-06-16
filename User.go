@@ -41,8 +41,7 @@ func (user *User) UserOnLine() {
 	user.Server.Lock.Unlock()
 
 	// 广播上线消息
-	msg := DealMsg("我上线啦", user)
-	user.Server.BroadCast(msg)
+	user.Server.BroadCast(user, "我上线啦")
 }
 
 func (user *User) UserOffLine() {
@@ -52,12 +51,16 @@ func (user *User) UserOffLine() {
 	user.Server.Lock.Unlock()
 
 	// 广播下线消息
-	msg := DealMsg("我下线啦", user)
-	user.Server.BroadCast(msg)
+	user.Server.BroadCast(user, "我下线啦")
 }
 
 func (user *User) UserDealMsg(msg string) {
 	// 处理用户的消息
-	msg = DealMsg(msg, user)
-	user.Server.BroadCast(msg)
+	switch msg {
+	case "who": // 显示我是谁,直接返回当前的用户名
+		user.Server.Private(user, user.UserName, user.UserName)
+
+	default: // 直接广播用户的消息
+		user.Server.BroadCast(user, msg)
+	}
 }

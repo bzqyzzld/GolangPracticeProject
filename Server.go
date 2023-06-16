@@ -79,6 +79,27 @@ func (server *Server) Handle(conn net.Conn) {
 	}
 }
 
-func (server *Server) BroadCast(msg string) {
-	server.BroadChan <- msg
+func (server *Server) BroadCast(fromUser *User, msg string) {
+	sendMsg := DealMsg(msg, fromUser)
+	server.BroadChan <- sendMsg
+}
+
+func (server *Server) Private(fromUser *User, toUserName, msg string) {
+	isFound := false
+	server.Lock.Lock()
+	for name, user := range server.UserGroup {
+		if name == toUserName {
+			isFound = true
+			sendMsg := DealMsg(msg, fromUser)
+			user.UserChan <- sendMsg
+			break
+		}
+	}
+	server.Lock.Unlock()
+
+	// 没有找到toUserName, 返回系统消息
+	if isFound == false {
+		sendMsg := DealMsg(fmt.Sprintf("没有找到%s用户", toUserName), nil)
+		fromUser.UserChan <- sendMsg
+	}
 }
