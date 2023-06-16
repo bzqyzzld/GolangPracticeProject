@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -56,9 +57,15 @@ func (user *User) UserOffLine() {
 
 func (user *User) UserDealMsg(msg string) {
 	// 处理用户的消息
-	switch msg {
-	case "who": // 显示我是谁,直接返回当前的用户名
+	switch true {
+	case regexp.MustCompile("^who$").MatchString(msg): // 显示我是谁,直接返回当前的用户名
 		user.Server.Private(user, user.UserName, user.UserName)
+
+	case regexp.MustCompile("^@(\\w+) (.*)").MatchString(msg): // 私聊某人
+		r := regexp.MustCompile("^@(\\w+) (.*)").FindStringSubmatch(msg)
+		toUserName := r[1]
+		sendMsg := r[2]
+		user.Server.Private(user, toUserName, sendMsg)
 
 	default: // 直接广播用户的消息
 		user.Server.BroadCast(user, msg)
