@@ -61,13 +61,27 @@ func (user *User) UserDealMsg(msg string) {
 	case regexp.MustCompile("^who$").MatchString(msg): // 显示我是谁,直接返回当前的用户名
 		user.Server.Private(user, user.UserName, user.UserName)
 
-	case regexp.MustCompile("^@(\\w+) (.*)").MatchString(msg): // 私聊某人
+	case regexp.MustCompile("^@(\\w+)\\s+(.*)").MatchString(msg): // 私聊某人
 		r := regexp.MustCompile("^@(\\w+) (.*)").FindStringSubmatch(msg)
 		toUserName := r[1]
 		sendMsg := r[2]
 		user.Server.Private(user, toUserName, sendMsg)
 
+	case regexp.MustCompile("^changeName\\s+(\\w+)").MatchString(msg): // 修改用户名字
+		r := regexp.MustCompile("^changeName\\s+(\\w+)").FindStringSubmatch(msg)
+		newName := r[1]
+		user.ChangeUserName(newName)
+
 	default: // 直接广播用户的消息
 		user.Server.BroadCast(user, msg)
 	}
+}
+
+func (user *User) ChangeUserName(newName string) {
+	// 修改用户名字
+	user.Server.Lock.Lock()
+	delete(user.Server.UserGroup, user.UserName)
+	user.Server.UserGroup[newName] = user
+	user.UserName = newName
+	user.Server.Lock.Unlock()
 }
