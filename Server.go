@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -63,20 +64,41 @@ func (server *Server) Handle(conn net.Conn) {
 	fmt.Printf("用户%s上线了\n", newUser.UserName)
 	newUser.UserOnLine()
 
-	// 处理用户消息
-	for {
-		buf := make([]byte, 1024)
-		n, err := conn.Read(buf)
-		if err != nil || n == 0 {
-			// 用户连接断开了
-			fmt.Printf("用户%s连接已经断开\n", newUser.UserName)
-			newUser.UserOffLine()
-			break
-		}
+	isLive := make(chan bool)
 
-		// 处理用户的消息
-		newUser.UserDealMsg(string(buf[:n]))
+	// 处理用户消息
+	go func() {
+		for {
+			buf := make([]byte, 1024)
+			n, err := conn.Read(buf)
+			if err != nil || n == 0 {
+				// 用户连接断开了
+				fmt.Printf("用户%s连接已经断开\n", newUser.UserName)
+				newUser.UserOffLine()
+				break
+			}
+
+			// 处理用户的消息
+			newUser.UserDealMsg(string(buf[:n]))
+			isLive <- true
+		}
+	}()
+
+	// 用户超时强制踢出,主要配合select和time.After使用
+	for {
+		select {
+		case <-isLive:
+			// 重置定时器,可以什么都不写
+		case <-time.After(10 * time.Second):
+			// 用户已经超时了,可以强制踢出
+			server.Private(newUser, newUser.UserName, "You had been kicked out!!!")
+			time.Sleep(time.Second) // 暂停1s钟，等待踢人消息完成发送
+			close(newUser.UserChan)
+			conn.Close()
+			return
+		}
 	}
+
 }
 
 func (server *Server) BroadCast(fromUser *User, msg string) {

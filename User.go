@@ -42,7 +42,7 @@ func (user *User) UserOnLine() {
 	user.Server.Lock.Unlock()
 
 	// 广播上线消息
-	user.Server.BroadCast(user, "我上线啦")
+	user.Server.BroadCast(user, "I'm online now")
 }
 
 func (user *User) UserOffLine() {
@@ -52,7 +52,8 @@ func (user *User) UserOffLine() {
 	user.Server.Lock.Unlock()
 
 	// 广播下线消息
-	user.Server.BroadCast(user, "我下线啦")
+	user.Server.BroadCast(user, "I'm offline now!!")
+
 }
 
 func (user *User) UserDealMsg(msg string) {

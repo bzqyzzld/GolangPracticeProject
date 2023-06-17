@@ -11,8 +11,8 @@ func DealMsg(msg string, u interface{}) string {
 	if ok == true {
 		name = user.UserName
 	} else {
-		name = "系统"
+		name = "system"
 	}
 	nowString := time.Now().Format("2006-01-02 15:04:05")
-	return fmt.Sprintf("%s【%s】%s", nowString, name, msg)
+	return fmt.Sprintf("%s[%s]%s", nowString, name, msg)
 }
