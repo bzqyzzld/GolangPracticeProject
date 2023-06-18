@@ -92,9 +92,8 @@ func (server *Server) Handle(conn net.Conn) {
 		case <-time.After(10 * time.Second):
 			// 用户已经超时了,可以强制踢出
 			server.Private(newUser, newUser.UserName, "You had been kicked out!!!")
-			time.Sleep(time.Second) // 暂停1s钟，等待踢人消息完成发送
+			//time.Sleep(time.Second) // 暂停1s钟，等待踢人消息完成发送
 			close(newUser.UserChan)
-			conn.Close()
 			return
 		}
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"regexp"
 	"strconv"
@@ -29,9 +30,18 @@ func CreateNewUser(conn net.Conn, server *Server) *User {
 }
 
 func (user *User) UserListenMsg() {
-	for {
-		msg := <-user.UserChan
-		user.UserConn.Write([]byte(msg))
+	for msg := range user.UserChan {
+		_, err := user.UserConn.Write([]byte(msg))
+		if err != nil {
+			fmt.Println("监听用户管道错误", err)
+			panic(err)
+		}
+	}
+
+	err := user.UserConn.Close()
+	if err != nil {
+		fmt.Println("关闭客户端连接错误", err)
+		panic(err)
 	}
 }
 
