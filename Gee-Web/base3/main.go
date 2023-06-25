@@ -8,7 +8,7 @@ import (
 func main() {
 	r := gee.NewEngine()
 	r.GET("/", func(context *gee.Context) {
-		context.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
+		context.HTML(http.StatusOK, "<h1>Hello gee</h1>")
 	})
 
 	r.GET("/hello", func(context *gee.Context) {
