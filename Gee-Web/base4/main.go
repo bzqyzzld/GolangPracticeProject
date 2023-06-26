@@ -8,7 +8,8 @@ import (
 func main() {
 	r := gee.NewEngine()
 	v1 := r.Group("/v1")
-	v1.GET("/", func(context *gee.Context) {
+	v2 := v1.Group("/test")
+	v2.GET("/", func(context *gee.Context) {
 		context.HTML(http.StatusOK, "<h1>Hello gee</h1>")
 	})
 
